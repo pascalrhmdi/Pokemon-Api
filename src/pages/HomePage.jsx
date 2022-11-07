@@ -1,6 +1,6 @@
 import axios from "axios";
 import React, { useEffect } from "react";
-import { Button, Col, Container, Dropdown, Form, Image, Pagination, Row, Spinner, Stack } from "react-bootstrap";
+import { Button, Col, Container, Dropdown, Form, Image, Pagination, Row, Spinner, Stack, Toast, ToastContainer } from "react-bootstrap";
 import { pokemonLogo } from "../assets";
 import { AppCard } from "../components";
 import { baseUrlPokemon, baseUrlTypes } from "../utils";
@@ -9,6 +9,7 @@ export default function HomePage() {
   const [pokemon, setPokemon] = React.useState([]);
   const [loading, setLoading] = React.useState(true);
   const [types, setTypes] = React.useState([]);
+  const [toast, setToast] = React.useState(true);
   // const [filteredTypes, setFilteredTypes] = React.useState([]);
 
   const [offset, setOffset] = React.useState(0);
@@ -19,7 +20,7 @@ export default function HomePage() {
       const { data } = await axios.get(`${baseUrlPokemon}/?limit=20&offset=${offset}`);
       await getAdditionalPokemonData(data.results);
     } catch (error) {
-      console.log(error.message);
+      setToast(true);
     }
   }
 
@@ -71,7 +72,6 @@ export default function HomePage() {
   useEffect(() => {
     getPokemon();
   }, [offset]);
-
 
   useEffect(() => {
     getPokemonTypes();
@@ -136,11 +136,11 @@ export default function HomePage() {
                   Kategori
                 </Dropdown.Toggle>
                 <Dropdown.Menu>
-                  {
-                    types.map((type, index) =>
-                        <Dropdown.Item key={index} className="text-capitalize" onClick={() => getPokemonByType(type.name)}>{type.name}</Dropdown.Item>
-                    )
-                  }
+                  {types.map((type, index) => (
+                    <Dropdown.Item key={index} className="text-capitalize" onClick={() => getPokemonByType(type.name)}>
+                      {type.name}
+                    </Dropdown.Item>
+                  ))}
                 </Dropdown.Menu>
               </Dropdown>
               <Pagination className="mb-0">
@@ -172,6 +172,15 @@ export default function HomePage() {
           </Row>
         </>
       )}
+      <ToastContainer className="p-4" position={"bottom-end"}>
+      <Toast bg="danger" onClose={() => setToast(false)} show={toast} delay={3000} autohide>
+        <Toast.Header className="p-2">
+          <strong className="me-auto">Permintaan Gagal</strong>
+          <small>Sekarang</small>
+          </Toast.Header>
+        <Toast.Body className="text-white p-3">Pokemon Tidak ditemukan</Toast.Body>
+      </Toast>
+      </ToastContainer>
     </Container>
   );
 }
